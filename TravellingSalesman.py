@@ -26,7 +26,7 @@ class Salesman:
 
 ''' returns a value between 0 and 1 '''
 def fitness(sm):
-    fit = 50000/sm.d
+    fit = 10000/sm.d
     if fit > 1: fit = 1; print('overflow')
     return fit
 
@@ -83,3 +83,43 @@ def elimination(pop,offspring,lam):
     pop.extend(offspring)               # concatenates population and offspring
     pop.sort(key=fitness,reverse=True)  # sorts on fitness, descending in value
     return pop[:lam]
+
+''' Initializes the population '''
+def initialize(tsp, lam):
+    return [Salesman(tsp) for i in range(lam)]
+
+def evolutionaryAlgorithm(tsp):
+    lam = 1000      # size of population
+    mu = 1000       # size of offspring
+    its = 100       # amount of iterations
+    alpha = 0.05    # chance of mutation
+    k = 10          # k-tournament selection
+
+    population = initialize(tsp, lam)
+    for i in range(its):
+        # Recombination
+        offspring = []
+        for j in range(mu):
+            p1 = selection(population,k)
+            p2 = selection(population,k)
+            offspring.append(crossover(p1,p2,tsp))
+            mutate(offspring[-1],alpha)
+
+        # Mutation
+        for ind in population:
+            mutate(ind,alpha)
+
+        # Elimination
+        population = elimination(population,offspring,lam)
+
+        # Prints
+        fitnessess = list(map(lambda x: fitness(x),population))
+        print("Iteration",i)
+        print("Mean fitness:",np.mean(fitnessess),"and Max fitness:",max(fitnessess))
+    print('-------------------------------------')
+    print('Best invdividual after '+str(its)+' iterations')
+    print(population[np.argmax(list(map(lambda x: fitness(x),population)))].path)
+    print(population[np.argmax(list(map(lambda x: fitness(x),population)))].d)
+
+TSP = TravellingSalesmanProblem()
+evolutionaryAlgorithm(TSP)
