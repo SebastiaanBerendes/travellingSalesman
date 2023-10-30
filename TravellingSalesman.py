@@ -18,6 +18,9 @@ class Salesman:
         d_array = [tsp.dm[self.path[i]-1, self.path[i+1]-1] for i in range(0, len(self.path)-1)] + [tsp.dm[self.path[-1]-1, self.path[1]-1]]
         self.d = sum(d_array)
 
+def fitness(sm):
+    return 50000/sm.d
+
 def mutate(sm, alpha):
     if rd.random() < alpha:
         end = rd.randint(0, len(sm.path) - 1)
@@ -53,7 +56,16 @@ def crossover_operation(np,p1,p2,i,city):
         else:
             return crossover_operation(np,p1,p2,index,city)
 
+def selection(tsp,population, k):
+    selected = rd.sample(population, k)
+    ind = np.argmax(list(map(lambda x: fitness(x), selected)))
+    return selected[ind]
+
+
 tsp = TravellingSalesmanProblem()
-sm1 = Salesman(tsp)
-sm2 = Salesman(tsp)
-crossover(sm1,sm2,tsp)
+pop = []
+k = 1000
+for i in range(k):
+    sm = Salesman(tsp)
+    pop.append(sm)
+selection(tsp, pop, k)
