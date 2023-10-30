@@ -10,7 +10,7 @@ class TravellingSalesmanProblem:
 
 ''' creates an individual '''
 class Salesman:
-    def __init__(self, tsp, path=None):
+    def __init__(self,tsp,path=None):
         # for generating first population
         if path is None:
             cities = len(tsp.dm)                                # amount of cities
@@ -31,7 +31,7 @@ def fitness(sm):
     return fit
 
 ''' reverses a portion of the path with chance alpha '''
-def mutate(sm, alpha):
+def mutate(sm,alpha):
     if rd.random() < alpha:
         end = rd.randint(0, len(sm.path) - 1)
         size = rd.randint(2, len(sm.path))
@@ -40,7 +40,7 @@ def mutate(sm, alpha):
             sm.path[end - size + 1 + i] = sel_cities[i]
 
 ''' crossover using algorithm of book chapter 5.3 '''
-def crossover(sm1, sm2, tsp):
+def crossover(sm1,sm2,tsp):
     new_path = [None] * len(sm1.path)
     end = rd.randint(0, len(sm1.path) - 1)
     size = rd.randint(2, len(sm1.path))
@@ -63,32 +63,23 @@ def crossover(sm1, sm2, tsp):
     return Salesman(tsp, new_path)
 
 ''' implements step 2 of crossover '''
-def crossover_operation(np,p1,p2,i,city):
+def crossover_operation(newp,p1,p2,i,city):
     while True:
         index = p2.index(p1[i])
-        if np[index] is None:
-            np[index] = city
+        if newp[index] is None:
+            newp[index] = city
             return
         else:
-            return crossover_operation(np,p1,p2,index,city)
+            return crossover_operation(newp,p1,p2,index,city)
 
 ''' k-tournament selection (no elitism)'''
-def selection(tsp, pop, k):
+def selection(pop,k):
     selected = rd.sample(pop, k)  # select k individual without replacement
     ind = np.argmax(list(map(lambda x: fitness(x), selected)))  # find index of individual with highest fitness
     return selected[ind]
 
 ''' combines the population with the offspring and returns the l best individuals'''
-def elimination(tsp,pop,offspring,l):
+def elimination(pop,offspring,lam):
     pop.extend(offspring)               # concatenates population and offspring
     pop.sort(key=fitness,reverse=True)  # sorts on fitness, descending in value
-    return pop[:l]
-
-
-tsp = TravellingSalesmanProblem()
-population = []
-l = 1000
-for i in range(l*2):
-    population.append(Salesman(tsp))
-elimination(tsp,population[:l],population[l:],l)
-
+    return pop[:lam]
