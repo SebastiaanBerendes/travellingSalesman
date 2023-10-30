@@ -1,6 +1,7 @@
 import random as rd
 import pandas as pd
 import numpy as np
+import time
 
 ''' creates a random TSP problem '''
 class TravellingSalesmanProblem:
@@ -89,9 +90,10 @@ def initialize(tsp, lam):
     return [Salesman(tsp) for i in range(lam)]
 
 def evolutionaryAlgorithm(tsp):
+    start = time.time()
     lam = 1000      # size of population
-    mu = 1000       # size of offspring
-    its = 100       # amount of iterations
+    mu = 100       # size of offspring
+    its = 500       # amount of iterations
     alpha = 0.05    # chance of mutation
     k = 10          # k-tournament selection
 
@@ -115,11 +117,13 @@ def evolutionaryAlgorithm(tsp):
         # Prints
         fitnessess = list(map(lambda x: fitness(x),population))
         print("Iteration",i)
-        print("Mean fitness:",np.mean(fitnessess),"and Max fitness:",max(fitnessess))
+        print("Mean fitness:",np.mean(fitnessess).round(4),"and Max fitness:",max(fitnessess).round(4))
     print('-------------------------------------')
     print('Best invdividual after '+str(its)+' iterations')
     print(population[np.argmax(list(map(lambda x: fitness(x),population)))].path)
     print(population[np.argmax(list(map(lambda x: fitness(x),population)))].d)
+    end = time.time()
+    print('Total elapsed time:',str(round(end-start,4)),'seconds')
 
 TSP = TravellingSalesmanProblem()
 evolutionaryAlgorithm(TSP)
