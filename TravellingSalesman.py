@@ -154,7 +154,7 @@ def evolutionary_algorithm(tsp):
             if stop:
                 break
     print('-------------------------------------')
-    print('Best invdividual after '+str(its)+' iterations')
+    print('Best invdividual after '+str(i)+' iterations')
     print(population[np.argmax(list(map(lambda x: fitness(x),population)))].path)
     print(population[np.argmax(list(map(lambda x: fitness(x),population)))].d)
     end = time.time()
