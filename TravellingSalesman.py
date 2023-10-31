@@ -3,31 +3,44 @@ import pandas as pd
 import numpy as np
 import time
 
+file = 50  # parameter for file
+
 ''' creates a random TSP problem '''
 class TravellingSalesmanProblem:
     def __init__(self):
-        dm = pd.read_csv('tour50(1).csv', sep=',', header=None)
+        dm = pd.read_csv('tour'+str(file)+'.csv', sep=',', header=None)
         self.dm = dm.to_numpy()
 
 ''' creates an individual '''
 class Salesman:
     def __init__(self,tsp,path=None):
         # for generating first population
+        self.d = np.inf
         if path is None:
-            cities = len(tsp.dm)                                # amount of cities
-            self.path = rd.sample(range(1, cities+1), cities)   # generates a random array of the cities
-
+            cities = len(tsp.dm)
+            while self.d == np.inf:
+                self.path = rd.sample(range(1, cities+1), cities)   # generates a random array of the cities
+                # calculate distance of path
+                d_array = [tsp.dm[self.path[i]-1, self.path[i+1]-1] for i in range(0, len(self.path)-1)] + [tsp.dm[self.path[-1]-1, self.path[1]-1]]
+                self.d = sum(d_array)
         # for generating crossover children
         else:
             self.path = path
-
-        # calculate distance of path
-        d_array = [tsp.dm[self.path[i]-1, self.path[i+1]-1] for i in range(0, len(self.path)-1)] + [tsp.dm[self.path[-1]-1, self.path[1]-1]]
-        self.d = sum(d_array)
+            # calculate distance of path
+            d_array = [tsp.dm[self.path[i]-1, self.path[i+1]-1] for i in range(0, len(self.path)-1)] + [tsp.dm[self.path[-1]-1, self.path[1]-1]]
+            self.d = sum(d_array)
 
 ''' returns a value between 0 and 1 '''
 def fitness(sm):
-    fit = 10000/sm.d
+    val = np.inf
+    match file:
+        case 50: val = 15000
+        case 100: val = 45000
+        case 200: val = 20000
+        case 500: val = 75000
+        case 750: val = 100000
+        case 1000: val = 100000
+    fit = val/sm.d
     if fit > 1: fit = 1; print('overflow')
     return fit
 
@@ -91,11 +104,7 @@ def initialize(tsp, lam):
 
 def evolutionaryAlgorithm(tsp):
     start = time.time()
-    lam = 1000      # size of population
-    mu = 100       # size of offspring
-    its = 500       # amount of iterations
-    alpha = 0.05    # chance of mutation
-    k = 10          # k-tournament selection
+    lam = 1000; mu = 1000; its = 1000; alpha = 0.05; k = 5
 
     population = initialize(tsp, lam)
     for i in range(its):
@@ -116,8 +125,9 @@ def evolutionaryAlgorithm(tsp):
 
         # Prints
         fitnessess = list(map(lambda x: fitness(x),population))
+        index = np.argmax(fitnessess)
         print("Iteration",i)
-        print("Mean fitness:",np.mean(fitnessess).round(4),"and Max fitness:",max(fitnessess).round(4))
+        print("Mean fitness:",np.mean(fitnessess).round(4),"and Max fitness:",str(max(fitnessess).round(4))+'/'+str(int(population[index].d)))
     print('-------------------------------------')
     print('Best invdividual after '+str(its)+' iterations')
     print(population[np.argmax(list(map(lambda x: fitness(x),population)))].path)
