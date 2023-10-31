@@ -10,6 +10,7 @@ class r0123456:
 		self.Nbparents = 2
 		self.KSample = 4
 		self.parents = 100
+		self.bestNB = 75
 		self.offsprings = 200
 		self.alpha = 0.05
 		self.reporter = Reporter.Reporter(self.__class__.__name__)
@@ -100,16 +101,17 @@ class r0123456:
 		return self.bestTour(Kparents)
 	
 	def mergeParents(self, p1, p2):
-		startCity = random.randint(0, len(p1) - 1)
+		size = random.randint(0, len(p1) - 1)
 		endCity = random.randint(0, len(p2) - 1)
-		if endCity < startCity:
-			endCity, startCity = startCity, endCity
 		child = [None for _ in range(len(self.distanceMatrix))]
+		segP2 = []
+		segP1 = []
+		for i in range(endCity, endCity-size, -1):
+			child[i] = p1[i]
+			segP2.append(p2[i])
+			segP1.append(p1[i])
 
-		child[startCity:endCity] = p1[startCity:endCity]
-		segP2 = p2[startCity:endCity]
-		segP1 = p1[startCity:endCity]
-		for city in p2[startCity:endCity]: #look for improvement
+		for city in segP2: #look for improvement
 			if city not in child:
 				for i, placement in enumerate(segP1):
 					if placement not in segP2:
@@ -134,19 +136,22 @@ class r0123456:
 		return offsprings
 
 	def eliminate(self, joinedPopulation): #maybe use kfold split in groups of size k and select the min value for every gro
+		population = []
 		joinedPopulation.sort(key=self.fitness)
-		return joinedPopulation[:self.parents]
+		population = joinedPopulation[:self.bestNB]
+		while len(population) < self.parents:
+			population.append( random.sample(joinedPopulation[self.bestNB:], 1)[0])
+		return population
+
 
 	def mutate(self, population):
 		for individual in population:
 			if random.random() < self.alpha:
-				startCity = random.randint(0, len(individual) - 1)
+				size = random.randint(0, len(individual) - 1)
 				endCity = random.randint(0, len(individual) - 1)
-				if endCity < startCity:
-					endCity, startCity = startCity, endCity
-				reversedCity = [individual[i] for i in range(endCity, startCity, -1)]
+				reversedCity = [individual[i] for i in range(endCity, endCity - size, -1)]
 				for i in range (len(reversedCity)):
-					individual[startCity+1+i] = reversedCity[i]
+					individual[endCity - size +1 +i] = reversedCity[i]
 		return population
 
 if __name__ == '__main__':
